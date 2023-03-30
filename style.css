@@ -1,0 +1,39 @@
+.game {
+    height: fit-content;
+    width: fit-content;
+    background-color: linear;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.box {
+    height: 35px;
+    width: 35px;
+    background-color: white;
+}
+
+.row {
+    display: flex;
+    flex-direction: row;
+}
+
+.snake {
+    background-color: green !important;
+}
+
+.snake-head {
+    background-color: blue !important;
+}
+
+.food {
+    background-color: red;
+}
+
+.wall {
+    background-color: black;
+}
+
+.gameover {
+    opacity: 0;
+}
