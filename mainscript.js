@@ -78,26 +78,35 @@ class snake {
         this.queue = new Array();
     }
 
+    next() {
+        if(this.direction == "right") {
+            return rows[this.y].boxes[this.x+1];
+        }
+        if(this.direction == "left") {
+            return rows[this.y].boxes[this.x-1];
+        }
+        if(this.direction == "up") {
+            return rows[this.y-1].boxes[this.x];
+        }
+        if(this.direction == "down") {
+            return rows[this.y+1].boxes[this.x];
+        }
+    }
+
     move() {
         this.head.box.classList.remove("snake-head");
+        checkCollision(this.head, this.next());
+        this.head = this.next();
         if(this.direction == "right") {
-            checkCollision(this, rows[this.y].boxes[this.x+1]);
-            this.head = rows[this.y].boxes[this.x+1];
             this.x++;
         }
         if(this.direction == "left") {
-            checkCollision(this, rows[this.y].boxes[this.x-1]);
-            this.head = rows[this.y].boxes[this.x-1];
             this.x--;
         }
         if(this.direction == "up") {
-            checkCollision(this, rows[this.y-1].boxes[this.x]);
-            this.head = rows[this.y-1].boxes[this.x];
             this.y--;
         }
         if(this.direction == "down") {
-            checkCollision(this, rows[this.y+1].boxes[this.x]);
-            this.head = rows[this.y+1].boxes[this.x];
             this.y++;
         }
         this.head.box.classList.add("snake-head");
@@ -107,7 +116,7 @@ class snake {
         this.body.push(this.head);
     }
 
-    moveKeepTail() {
+    eat() {
         this.head.box.classList.remove("snake-head");
         if(this.direction == "right") {
             this.head = rows[this.y].boxes[this.x+1];
@@ -128,14 +137,7 @@ class snake {
         this.head.box.classList.add("snake-head");
         this.head.box.classList.add("snake");
         this.body.push(this.head);
-    }
-}
-
-function moveQueue(snake, queue, length) { 
-    for(let i = 0; i < length; i++) {
-        console.log(queue[i])
-        snake.direction = queue[i];
-        snake.move();
+        this.tail = this.body[0];
     }
 }
 
@@ -165,49 +167,67 @@ let snakey = new snake();
 let foody = new food();
 
 
-let interval = setInterval(runner, 126, snakey);
+let interval = setInterval(runner, 100, snakey);
 
 let intervalClearer = setInterval(function() {
+    if(!snakey.alive) {
+        clearInterval(interval);
+        gameOver.style.opacity = "1";
+    }}
+,100);
 
-if(!snakey.alive) {
-    clearInterval(interval);
-    gameOver.style.opacity = "1";
-}},156);
-
-function runner(snake) {
-    if(snake.head == foody.box) {
-        snake.queue = new Array();
+function runner(snakey) {
+    if(snakey.next() == foody.box) {
+        snakey.queue = new Array();
         console.log("food eaten");
         foody.box.box.classList.remove("food");
         foody = new food();
-        snake.moveKeepTail();
+        snakey.eat();
+    }  else if(snakey.queue[0] === undefined) {
+        snakey.queue = queueDJ(snakey);
+        snakey.queue.shift();
     } else {
-        snake.move();
+        let direct = snakey.queue[0];
+        snakey.direction = direct;
+        let failSafe = 0;
+        if(snakey.next().box.classList.contains("snake")) {
+            console.log(snakey.next());
+            snakey.queue.reverse();
+            failSafe++;
+            if(failSafe > 2 && (snakey.queue[0] == "right" || snakey.queue[0] == "left")) {
+                snakey.push("right");
+            }
+        }
+        snakey.direction = snakey.queue.shift();
+        snakey.move();
     }
+    console.log(snakey.queue);  
 }
 
-function runnerAuto(snake) {
-    let dj = dijkstra(snake.x, snake.y, foody.x, foody.y);
-    let currentX = snake.x;
-    let currentY = snake.y;
+function queueDJ(snakey) {
+    let dj = dijkstra(snakey.x, snakey.y, foody.x, foody.y, snakey);
+    let currentX = snakey.x;
+    let currentY = snakey.y;
     for(let i = 0; i < dj.length; i++) {
         if(dj[i][0] == currentX-1){
-            snake.queue[i] = "left";
+            snakey.queue[i] = "left";
             currentX--;
         }
         if(dj[i][0] == currentX+1){
-            snake.queue[i] = "right";
+            snakey.queue[i] = "right";
             currentX++;
         }
         if(dj[i][1] == currentY-1){
-            snake.queue[i] = "up";
+            snakey.queue[i] = "up";
             currentY--;
         }
         if(dj[i][1] == currentY+1){
-            snake.queue[i] = "down";
+            snakey.queue[i] = "down";
             currentY++;
         }
     }
+    console.log(snakey.queue);
+    return snakey.queue;
 }
 
 //restart button

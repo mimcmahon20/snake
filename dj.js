@@ -1,15 +1,16 @@
 import { rows } from "./mainscript.js";
 
-export function dijkstra(startX, startY, goalX, goalY) {
+export function dijkstra(startX, startY, goalX, goalY, snakey) {
   let totalRows = 20;
       // Initialize the distances and paths to all nodes
   let distances = [];
   let paths = [];
-  for (let i = 0; i < totalRows; i++) {
+  for (let i = 0; i < totalRows*2; i++) {
     distances[i] = new Array(totalRows).fill(Infinity);
     paths[i] = new Array(totalRows).fill(null);
   }
   distances[startX][startY] = 0;
+
 
   // Create a set of unvisited nodes
   let unvisited = new Set();
@@ -19,8 +20,10 @@ export function dijkstra(startX, startY, goalX, goalY) {
     }
   }
 
+
   // Loop until we visit all nodes
   while (unvisited.size > 0) {
+    
     // Find the node with the shortest distance from the start node
     let minDistance = Infinity;
     let minNode;
@@ -33,8 +36,6 @@ export function dijkstra(startX, startY, goalX, goalY) {
     // Remove the node from the unvisited set
     unvisited.delete(minNode);
     if(minNode == null) {
-      //description.innerHTML = "No path found";
-      //resetGame();
       return null;
     } else {
       // If we have reached the end node, return the path
@@ -44,12 +45,13 @@ export function dijkstra(startX, startY, goalX, goalY) {
         while (currentNode !== null) {
           path.unshift(currentNode);
           currentNode = paths[currentNode[0]][currentNode[1]];
+          
         }
         return path;
       }
 
       // Update the distances and paths of the neighboring nodes
-      let neighbors = getNeighbors(minNode[0], minNode[1]);
+      let neighbors = getNeighbors(minNode[0], minNode[1], snakey);
       for (let neighbor of neighbors) {
         let distance = distances[minNode[0]][minNode[1]] + 1;
         if (distance < distances[neighbor[0]][neighbor[1]]) {
@@ -58,13 +60,12 @@ export function dijkstra(startX, startY, goalX, goalY) {
         }
       }
     }
-    
   }
 
   // If we haven't found a path to the end node, return null
   return null;
 
-  function getNeighbors(x, y) {
+  function getNeighbors(x, y, snakey) {
     let neighbors = [];
     if (x > 0 && rows[x - 1].boxes[y].box.classList.contains("wall") == false) {
       neighbors.push([x - 1, y]);
@@ -75,35 +76,9 @@ export function dijkstra(startX, startY, goalX, goalY) {
     if (x < totalRows-1 && rows[x + 1].boxes[y].box.classList.contains("wall") == false) {
       neighbors.push([x + 1, y]);
     }
-    if (y < totalRows-1 && rows[x].boxes[y + 1].box.classList.contains("wall") == false) {
+    if (y < totalRows-1 && rows[x].boxes[y + 1].box.classList.contains("wall") == false ) {
       neighbors.push([x, y + 1]);
-    }
+    } 
     return neighbors;
   }
 }
-
-// function resetGame() {
-//     rows.forEach(function(row) {
-//         row.boxes.forEach(function(box) {
-//             box.box.classList.remove("clicked");
-//             box.box.classList.remove("goal");
-//             box.box.classList.remove("start");
-//             box.box.style = "background-color: white";
-//         });
-//     });
-//     startX = Math.floor(Math.random() * totalRows);
-//     startY = Math.floor(Math.random() * totalRows);
-//     rows[startX].boxes[startY].box.classList.add("start");
-//     goalX = Math.floor(Math.random() * totalRows);
-//     goalY = Math.floor(Math.random() * totalRows);
-//     while(goalX == startX && goalY == startY) {
-//         goalX = Math.floor(Math.random() * totalRows);
-//         goalY = Math.floor(Math.random() * totalRows);
-//     }
-//     rows[goalX].boxes[goalY].box.classList.add("goal");
-//     totalSearched = 0;
-//     totalDistance = 0;
-// }
-
-//resetGame();
-
