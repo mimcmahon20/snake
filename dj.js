@@ -67,18 +67,26 @@ export function dijkstra(startX, startY, goalX, goalY, snakey) {
 
   function getNeighbors(x, y, snakey) {
     let neighbors = [];
-    if (x > 0 && rows[x - 1].boxes[y].box.classList.contains("wall") == false) {
-      neighbors.push([x - 1, y]);
+    if( x > 0 && !rows[y].boxes[x-1].box.classList.contains("wall")) {
+      neighbors.push([x-1, y]);
     }
-    if (y > 0 && rows[x].boxes[y - 1].box.classList.contains("wall") == false) {
-      neighbors.push([x, y - 1]);
+    if( x < totalRows-1 && !rows[y].boxes[x+1].box.classList.contains("wall")) {
+      neighbors.push([x+1, y]);
     }
-    if (x < totalRows-1 && rows[x + 1].boxes[y].box.classList.contains("wall") == false) {
-      neighbors.push([x + 1, y]);
+    if( y > 0 && !rows[y-1].boxes[x].box.classList.contains("wall")) {
+      neighbors.push([x, y-1]);
     }
-    if (y < totalRows-1 && rows[x].boxes[y + 1].box.classList.contains("wall") == false ) {
-      neighbors.push([x, y + 1]);
-    } 
+    if( y < totalRows-1 && !rows[y+1].boxes[x].box.classList.contains("wall")) {
+      neighbors.push([x, y+1]);
+    }
+    neighbors.forEach(neighbor => {
+      snakey.body.forEach(snake => {
+        if(rows[neighbor[0]].boxes[neighbor[1]] === snake) {
+          neighbors.splice(neighbors.indexOf(neighbor), 1);
+          console.log("SNAKE REMOVED");
+        }
+      });
+    });
     return neighbors;
   }
 }

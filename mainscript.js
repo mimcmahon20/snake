@@ -12,6 +12,9 @@ class box {
     }
 }
 
+// This class creates a row of boxes, and defines a function that adds a box to the row.
+
+
 class row {
     constructor() {
         this.row = document.createElement("div");
@@ -26,13 +29,18 @@ class row {
         this.row.appendChild(boxy.box);
     }
 }
-
+// create an array to store all the rows of boxes
 let totalRows = 20;
 export let rows = new Array();
+// loop through the total number of rows
 for(let i = 0; i < totalRows; i++) {
+    // create a new row object and store it in the rows array
     rows[i] = new row();
+    // loop through the total number of boxes in each row
     for(let j = 0; j < totalRows; j++) {
+        // add a box to the row
         rows[i].addBox();
+        // if the box is on the edge of the grid, add the wall class
         if(i == 0|| j == 0 || i == totalRows-1 || j == totalRows-1) {
             rows[i].boxes[j].box.classList.add("wall");
         }
@@ -41,10 +49,12 @@ for(let i = 0; i < totalRows; i++) {
 
 class food {
     constructor() {
+        // The food will be placed anywhere in the grid but not on the borders
         this.x = Math.floor(Math.random() * (totalRows-1)+1);
         this.y = Math.floor(Math.random() * (totalRows-1)+1);
+        // If the food is placed on the border or on the snake, it will be placed again
         while(this.x == 0 || this.y == 0 || this.x == totalRows-1 || this.y == totalRows-1
-            && !rows[this.y].boxes[this.x].box.classList.contains("snake")) { 
+            || rows[this.y].boxes[this.x].box.classList.contains("snake")) { 
             this.x = Math.floor(Math.random() * (totalRows-1)+1);
             this.y = Math.floor(Math.random() * (totalRows-1)+1);
         }
@@ -95,7 +105,7 @@ class snake {
 
     move() {
         this.head.box.classList.remove("snake-head");
-        checkCollision(this.head, this.next());
+        checkCollision(this, this.next());
         this.head = this.next();
         if(this.direction == "right") {
             this.x++;
@@ -118,6 +128,7 @@ class snake {
 
     eat() {
         this.head.box.classList.remove("snake-head");
+        checkCollision(this, this.next());
         if(this.direction == "right") {
             this.head = rows[this.y].boxes[this.x+1];
             this.x++;
@@ -134,16 +145,18 @@ class snake {
             this.head = rows[this.y+1].boxes[this.x];
             this.y++;
         }
+        
         this.head.box.classList.add("snake-head");
         this.head.box.classList.add("snake");
+        this.head.box.classList.remove("food");
         this.body.push(this.head);
         this.tail = this.body[0];
     }
 }
 
-function checkCollision(snake, box) {
+function checkCollision(snakey, box) {
     if(box.box.classList.contains("wall") || box.box.classList.contains("snake")) {
-        snake.alive = false;
+        snakey.alive = false;
         console.log("game over");
     }
 }
@@ -176,14 +189,18 @@ let intervalClearer = setInterval(function() {
     }}
 ,100);
 
+intervalClearer;
+
 function runner(snakey) {
-    if(snakey.next() == foody.box) {
+    snakey.queue = queueDJ(snakey);
+    snakey.queue.shift();
+    if(snakey.next() == foody.box || snakey.head.box.classList.contains("food")) {
         snakey.queue = new Array();
         console.log("food eaten");
         foody.box.box.classList.remove("food");
-        foody = new food();
         snakey.eat();
-    }  else if(snakey.queue[0] === undefined) {
+        foody = new food();
+    }  else if(snakey.queue[0] === undefined || snakey.queue[0] === null) {
         snakey.queue = queueDJ(snakey);
         snakey.queue.shift();
     } else {
@@ -191,23 +208,42 @@ function runner(snakey) {
         snakey.direction = direct;
         let failSafe = 0;
         if(snakey.next().box.classList.contains("snake")) {
-            console.log(snakey.next());
             snakey.queue.reverse();
             failSafe++;
-            if(failSafe > 2 && (snakey.queue[0] == "right" || snakey.queue[0] == "left")) {
-                snakey.push("right");
+            if(failSafe > 2 && (snakey.queue[snakey.queue.length] == "right" || snakey.queue[snakey.queue.length] == "left")) {
+                snakey.queue.push("up");
+                console.log("failsafe");
+            }
+            if(failSafe > 2 && (snakey.queue[snakey.queue.length] == "up" || snakey.queue[snakey.queue.length] == "down")) {
+                snakey.queue.push("left");
+                console.log("failsafe");
             }
         }
-        snakey.direction = snakey.queue.shift();
-        snakey.move();
+        if(snakey.next() == foody) {
+            snakey.queue = new Array();
+            snakey.queue = queueDJ(snakey);
+            console.log("food eaten specially");
+            foody.box.box.classList.remove("food");
+            snakey.eat();
+            foody = new food();
+        } else {
+            snakey.direction = snakey.queue.shift();
+            snakey.move();
+        }
     }
-    console.log(snakey.queue);  
+    
 }
 
 function queueDJ(snakey) {
     let dj = dijkstra(snakey.x, snakey.y, foody.x, foody.y, snakey);
     let currentX = snakey.x;
     let currentY = snakey.y;
+    if(dj === null) {
+        console.log("bug");
+        snakey.queue.push("right");
+        return snakey.queue;
+    }
+    
     for(let i = 0; i < dj.length; i++) {
         if(dj[i][0] == currentX-1){
             snakey.queue[i] = "left";
