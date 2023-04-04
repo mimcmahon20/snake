@@ -13,12 +13,23 @@ export function dijkstra(startX, startY, goalX, goalY, snakey) {
 
 
   // Create a set of unvisited nodes
-  let unvisited = new Set();
-  for (let i = 0; i < totalRows; i++) {
-    for (let j = 0; j < totalRows; j++) {
+let unvisited = new Set();
+for (let i = 0; i < totalRows; i++) {
+  for (let j = 0; j < totalRows; j++) {
+    let skipNode = false;
+    //checks to see if the node is in the snake's body
+    for (let segment of snakey.body.slice(0, -1)) {
+      if (rows[j].boxes[i] === segment) {
+        skipNode = true;
+        break;
+      }
+    }
+    //if it is not in the snake's body, add it to the unvisited set
+    if (!skipNode) {
       unvisited.add([i, j]);
     }
   }
+}
 
 
   // Loop until we visit all nodes
@@ -79,14 +90,6 @@ export function dijkstra(startX, startY, goalX, goalY, snakey) {
     if( y < totalRows-1 && !rows[y+1].boxes[x].box.classList.contains("wall")) {
       neighbors.push([x, y+1]);
     }
-    neighbors.forEach(neighbor => {
-      snakey.body.forEach(snake => {
-        if(rows[neighbor[0]].boxes[neighbor[1]] === snake) {
-          neighbors.splice(neighbors.indexOf(neighbor), 1);
-          console.log("SNAKE REMOVED");
-        }
-      });
-    });
     return neighbors;
   }
 }

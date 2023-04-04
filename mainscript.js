@@ -262,7 +262,6 @@ function queueDJ(snakey) {
             currentY++;
         }
     }
-    console.log(snakey.queue);
     return snakey.queue;
 }
 
