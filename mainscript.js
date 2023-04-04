@@ -155,26 +155,30 @@ class snake {
 }
 
 function checkCollision(snakey, box) {
+    if(box == null){
+        snakey.alive = false;
+        console.log("game over null");
+    }
     if(box.box.classList.contains("wall") || box.box.classList.contains("snake")) {
         snakey.alive = false;
         console.log("game over");
     }
 }
 
-document.addEventListener("keydown", function(event) { 
-    if(event.key == "ArrowRight") {
-        snakey.direction = "right";
-    }
-    if(event.key == "ArrowLeft") {
-        snakey.direction = "left";
-    }
-    if(event.key == "ArrowUp") {
-        snakey.direction = "up";
-    }
-    if(event.key == "ArrowDown") {
-        snakey.direction = "down";
-    }
-});
+// document.addEventListener("keydown", function(event) { 
+//     if(event.key == "ArrowRight") {
+//         snakey.direction = "right";
+//     }
+//     if(event.key == "ArrowLeft") {
+//         snakey.direction = "left";
+//     }
+//     if(event.key == "ArrowUp") {
+//         snakey.direction = "up";
+//     }
+//     if(event.key == "ArrowDown") {
+//         snakey.direction = "down";
+//     }
+// });
 
 let snakey = new snake();
 let foody = new food();
@@ -191,40 +195,28 @@ let intervalClearer = setInterval(function() {
 
 intervalClearer;
 
+//MAIN FUNCTION
 function runner(snakey) {
+    //Update the queue of the snake
     snakey.queue = queueDJ(snakey);
+    //removing the null entry
     snakey.queue.shift();
+    //checks to see if next tile is food OR if the snake's head is already on food somehow
     if(snakey.next() == foody.box || snakey.head.box.classList.contains("food")) {
         snakey.queue = new Array();
         console.log("food eaten");
         foody.box.box.classList.remove("food");
-        snakey.eat();
-        foody = new food();
-    }  else if(snakey.queue[0] === undefined || snakey.queue[0] === null) {
-        snakey.queue = queueDJ(snakey);
-        snakey.queue.shift();
+        snakey.eat();//replaces food with head, rest of snake does not move
+        foody = new food(); //spawns in new piece of food at random location not on snake
     } else {
-        let direct = snakey.queue[0];
-        snakey.direction = direct;
-        let failSafe = 0;
-        if(snakey.next().box.classList.contains("snake")) {
-            snakey.queue.reverse();
-            failSafe++;
-            if(failSafe > 2 && (snakey.queue[snakey.queue.length] == "right" || snakey.queue[snakey.queue.length] == "left")) {
-                snakey.queue.push("up");
-                console.log("failsafe");
-            }
-            if(failSafe > 2 && (snakey.queue[snakey.queue.length] == "up" || snakey.queue[snakey.queue.length] == "down")) {
-                snakey.queue.push("left");
-                console.log("failsafe");
-            }
-        }
-        if(snakey.next() == foody) {
+        snakey.direction = snakey.queue[0];
+        //if the snake is not on food, it moves normally
+        if(snakey.next() == foody.box) {
+            snakey.eat();
             snakey.queue = new Array();
             snakey.queue = queueDJ(snakey);
             console.log("food eaten specially");
             foody.box.box.classList.remove("food");
-            snakey.eat();
             foody = new food();
         } else {
             snakey.direction = snakey.queue.shift();

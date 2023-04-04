@@ -74,6 +74,7 @@ for (let i = 0; i < totalRows; i++) {
   }
 
   // If we haven't found a path to the end node, return null
+  console.log("No path found");
   return null;
 
   function getNeighbors(x, y, snakey) {
