@@ -30,18 +30,19 @@ class row {
     }
 }
 // create an array to store all the rows of boxes
-let totalRows = 20;
+export let totalRows = 30;
+export let totalCols = 30;
 export let rows = new Array();
 // loop through the total number of rows
-for(let i = 0; i < totalRows; i++) {
+for(let i = 0; i < totalRows; i++) { //i is row number or y
     // create a new row object and store it in the rows array
     rows[i] = new row();
     // loop through the total number of boxes in each row
-    for(let j = 0; j < totalRows; j++) {
+    for(let j = 0; j < totalCols; j++) { //j is column number or x
         // add a box to the row
         rows[i].addBox();
         // if the box is on the edge of the grid, add the wall class
-        if(i == 0|| j == 0 || i == totalRows-1 || j == totalRows-1) {
+        if(i == 0|| j == 0 || i == totalRows-1 || j == totalCols-1) {
             rows[i].boxes[j].box.classList.add("wall");
         }
     }
@@ -50,12 +51,12 @@ for(let i = 0; i < totalRows; i++) {
 class food {
     constructor() {
         // The food will be placed anywhere in the grid but not on the borders
-        this.x = Math.floor(Math.random() * (totalRows-1)+1);
+        this.x = Math.floor(Math.random() * (totalCols-1)+1);
         this.y = Math.floor(Math.random() * (totalRows-1)+1);
         // If the food is placed on the border or on the snake, it will be placed again
-        while(this.x == 0 || this.y == 0 || this.x == totalRows-1 || this.y == totalRows-1
+        while(this.x == 0 || this.y == 0 || this.x == totalCols-1 || this.y == totalRows-1
             || rows[this.y].boxes[this.x].box.classList.contains("snake")) { 
-            this.x = Math.floor(Math.random() * (totalRows-1)+1);
+            this.x = Math.floor(Math.random() * (totalCols-1)+1);
             this.y = Math.floor(Math.random() * (totalRows-1)+1);
         }
         this.box = rows[this.y].boxes[this.x];
@@ -184,14 +185,14 @@ let snakey = new snake();
 let foody = new food();
 
 
-let interval = setInterval(runner, 100, snakey);
+let interval = setInterval(runner, 25, snakey);
 
 let intervalClearer = setInterval(function() {
     if(!snakey.alive) {
         clearInterval(interval);
         gameOver.style.opacity = "1";
     }}
-,100);
+,25);
 
 intervalClearer;
 

@@ -1,11 +1,10 @@
-import { rows } from "./mainscript.js";
+import { rows, totalRows, totalCols } from "./mainscript.js";
 
 export function dijkstra(startX, startY, goalX, goalY, snakey) {
-  let totalRows = 20;
       // Initialize the distances and paths to all nodes
   let distances = [];
   let paths = [];
-  for (let i = 0; i < totalRows*2; i++) {
+  for (let i = 0; i < totalRows + totalCols; i++) {
     distances[i] = new Array(totalRows).fill(Infinity);
     paths[i] = new Array(totalRows).fill(null);
   }
@@ -15,18 +14,18 @@ export function dijkstra(startX, startY, goalX, goalY, snakey) {
   // Create a set of unvisited nodes
 let unvisited = new Set();
 for (let i = 0; i < totalRows; i++) {
-  for (let j = 0; j < totalRows; j++) {
+  for (let j = 0; j < totalCols; j++) {
     let skipNode = false;
     //checks to see if the node is in the snake's body
     for (let segment of snakey.body.slice(0, -1)) {
-      if (rows[j].boxes[i] === segment) {
+      if (rows[i].boxes[j] === segment) {
         skipNode = true;
         break;
       }
     }
     //if it is not in the snake's body, add it to the unvisited set
     if (!skipNode) {
-      unvisited.add([i, j]);
+      unvisited.add([j, i]);
     }
   }
 }
@@ -82,7 +81,7 @@ for (let i = 0; i < totalRows; i++) {
     if( x > 0 && !rows[y].boxes[x-1].box.classList.contains("wall")) {
       neighbors.push([x-1, y]);
     }
-    if( x < totalRows-1 && !rows[y].boxes[x+1].box.classList.contains("wall")) {
+    if( x < totalCols-1 && !rows[y].boxes[x+1].box.classList.contains("wall")) {
       neighbors.push([x+1, y]);
     }
     if( y > 0 && !rows[y-1].boxes[x].box.classList.contains("wall")) {
